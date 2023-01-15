@@ -63,8 +63,8 @@ class avlgrid : public grid<T>
 template <class T>
 int avlgrid<T>::comparenode(int curr, vector<T>& newT)
 {
-  assert(cols() == newT.dim());
-  for (int i = 0; i < cols(); ++i) {
+  assert(this->cols() == newT.dim());
+  for (int i = 0; i < this->cols(); ++i) {
     if ((*this)(curr, i) < newT[i])
       return 1;
     if ((*this)(curr, i) > newT[i])
@@ -79,19 +79,21 @@ int avlgrid<T>::comparenode(int curr, vector<T>& newT)
 template <class T>
 int avlgrid<T>::insert(vector<T>& newT, int allowdups, int currnode)
 {
-  if (rows() == 0)
+  if (this->rows() == 0)
     init(defavlsize, newT.dim());
   
-  assert(newT.dim() == cols());
+  assert(newT.dim() == this->cols());
 
   // Expand the grid if necessary
-  if (numnodes == rows()) {
-    grid<T> tmp(rows() * 2, cols());
-    igrid nparent(rows() * 2), nleft(rows() * 2), nright(rows() * 2);
-    vector<balfactor> nbal(rows() * 2);
+  if (numnodes == this->rows()) {
+    grid<T> tmp(this->rows() * 2, this->cols());
+    igrid nparent(this->rows() * 2);
+    igrid nleft(this->rows() * 2);
+    igrid nright(this->rows() * 2);
+    vector<balfactor> nbal(this->rows() * 2);
 
-    for (int i = 0; i < rows(); ++i) {
-      for (int j = 0; j < cols(); ++j)
+    for (int i = 0; i < this->rows(); ++i) {
+      for (int j = 0; j < this->cols(); ++j)
 	tmp(i, j) = (*this)(i, j);
       nparent(i) = parent(i);
       nleft(i) = left(i);
@@ -110,7 +112,7 @@ int avlgrid<T>::insert(vector<T>& newT, int allowdups, int currnode)
     rootnode = 0;
     parent(0) = left(0) = right(0) = -1;
     bal[0] = EH;
-    for (int i = 0; i < cols(); ++i)
+    for (int i = 0; i < this->cols(); ++i)
       (*this)(0, i) = newT[i];
     numnodes = 1;
     return 1;
@@ -135,7 +137,7 @@ int avlgrid<T>::insert(vector<T>& newT, int allowdups, int currnode)
       parent(numnodes) = currnode;
       left(numnodes) = right(numnodes) = -1;
       bal[numnodes] = EH;
-      for (int i = 0; i < cols(); ++i)
+      for (int i = 0; i < this->cols(); ++i)
 	(*this)(numnodes, i) = newT[i];
       ++numnodes;
       taller = 1;
@@ -168,7 +170,7 @@ int avlgrid<T>::insert(vector<T>& newT, int allowdups, int currnode)
       parent(numnodes) = currnode;
       left(numnodes) = right(numnodes) = -1;
       bal[numnodes] = EH;
-      for (int i = 0; i < cols(); ++i)
+      for (int i = 0; i < this->cols(); ++i)
 	(*this)(numnodes, i) = newT[i];
       ++numnodes;
       taller = 1;
@@ -236,7 +238,7 @@ int avlgrid<T>::tooclose(vector<T>& newT, T dist)
   while (curr != -1 && (*this)(curr, 0) <= newT[0] + dist)
   {
     max = 0;
-    const int len = cols();
+    const int len = this->cols();
     for (int i = 0; i < len; ++i) {
       newmax = abs(newT[i] - (*this)(curr, i));
       if (newmax > max)
@@ -399,7 +401,7 @@ template <class T>
 void avlgrid<T>::dump() const
 {
   for (int i = first(); i != -1; i = next(i)) {
-    for (int j = 0; j < cols(); ++j)
+    for (int j = 0; j < this->cols(); ++j)
       cout << (*this)(i, j) << " ";
     cout << endl;
   }
@@ -413,7 +415,7 @@ template <class T>
 void avlgrid<T>::dump_rev() const
 {
   for (int i = last(); i != -1; i = prev(i)) {
-    for (int j = 0; j < cols(); ++j)
+    for (int j = 0; j < this->cols(); ++j)
       cout << (*this)(i, j) << " ";
     cout << endl;
   }

@@ -4,6 +4,8 @@
 // __________________________________________________________________________
 // Basic 1-dimensional array
 
+using std::ifstream;
+
 #include <cassert>
 #include <fstream>
 #include <iostream>

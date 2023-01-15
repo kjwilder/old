@@ -8,14 +8,17 @@
 #include <string.h>
 #include <cstdio>
 
+using std::istream;
+using std::ostream;
+
 // __________________________________________________________________________
 
 #define defsize 80
 
 class simpstrg
 {
-  friend class istream& operator>>(istream& s, simpstrg& x);
-  friend class ostream& operator<<(ostream& s, const simpstrg& x);
+  friend istream& operator>>(istream& s, simpstrg& x);
+  friend ostream& operator<<(ostream& s, const simpstrg& x);
 
  private:
   unsigned int curr;

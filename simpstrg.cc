@@ -4,6 +4,7 @@
 // __________________________________________________________________________
 // Include files
 
+#include <cstdio>
 #include "simpstrg.h"
 
 #define notype
@@ -31,7 +32,7 @@ notype simpstrg::simpstrg(const char* s) : curr(strlen(s))
 
 notype simpstrg::simpstrg(const int n) : max(defsize), buf(defbuf)
 {
-  sprintf(buf, "%i", n);
+  snprintf(buf, 1024, "%i", n);
   curr = strlen(buf);
 }
 

@@ -13,6 +13,12 @@
 // __________________________________________________________________________
 // grid of elements of type T
 
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::ifstream;
+using std::ofstream;
+
 template <class T>
 class grid
 {
@@ -83,7 +89,7 @@ class grid
 
   // I/O Functions
   void write(const char *file);
-  int write(class ofstream& os);
+  int write(ofstream& os);
   int read(const char* file);
   int read(ifstream& is);
   int loadpgm(const char* pgmname);
