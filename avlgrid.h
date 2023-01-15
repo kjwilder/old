@@ -98,7 +98,7 @@ int avlgrid<T>::insert(const vector<T>& newT, int allowdups, int currnode) {
     (*this).parent << nparent;
     (*this).left << nleft;
     (*this).right << nright;
-    (*this).bal << nbal;
+    (*this).bal << &nbal;
   }
 
   // Handle the case when the tree is empty

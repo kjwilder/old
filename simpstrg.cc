@@ -4,24 +4,24 @@
 
 #define notype
 
-notype simpstrg::simpstrg() : curr(0), max(kDefSize), buf(defbuf) {
+notype simpstrg::simpstrg() : curr(0), max(kMaxStringLength), buf(defbuf) {
   buf[0] = 0;
 }
 
 notype simpstrg::simpstrg(const simpstrg &s) : curr(s.curr) {
-  max = (curr > kDefSize ? curr : kDefSize);
-  buf = (curr > kDefSize ? new char[curr + 1] : defbuf);
+  max = (curr > kMaxStringLength ? curr : kMaxStringLength);
+  buf = (curr > kMaxStringLength ? new char[curr + 1] : defbuf);
   memcpy(buf, s.buf, curr + 1);
 }
 
 notype simpstrg::simpstrg(const char* s) : curr(strlen(s)) {
-  max = (curr > kDefSize ? curr : kDefSize);
-  buf = (curr > kDefSize ? new char[curr + 1] : defbuf);
+  max = (curr > kMaxStringLength ? curr : kMaxStringLength);
+  buf = (curr > kMaxStringLength ? new char[curr + 1] : defbuf);
   memcpy(buf, s, curr + 1);
 }
 
-notype simpstrg::simpstrg(const int n) : max(kDefSize), buf(defbuf) {
-  snprintf(buf, kDefSize + 1, "%i", n);
+notype simpstrg::simpstrg(const int n) : max(kMaxStringLength), buf(defbuf) {
+  snprintf(buf, kMaxStringLength, "%i", n);
   curr = strlen(buf);
 }
 
@@ -36,7 +36,7 @@ simpstrg& simpstrg::operator=(const simpstrg& s) {
     return *this;
   }
   if (max < (curr = s.curr)) {
-    if (max > kDefSize) {
+    if (max > kMaxStringLength) {
       delete [] buf;
     }
     buf = new char[curr + 1];
@@ -51,7 +51,7 @@ simpstrg& simpstrg::operator=(const char* s) {
     return *this;
   }
   if (max < (curr = strlen(s))) {
-    if (max > kDefSize) {
+    if (max > kMaxStringLength) {
       delete [] buf;
     }
     buf = new char[curr + 1];
@@ -65,7 +65,7 @@ simpstrg simpstrg::operator+=(const simpstrg& s) {
   if (max > curr + s.curr) {
     memcpy(buf + curr, s.buf, s.curr);
     buf[curr += s.curr] = 0;
-  } else if (max > kDefSize) {
+  } else if (max > kMaxStringLength) {
     max = curr + s.curr;
     char *tmpbuf = new char[max + 1];
     memcpy(tmpbuf, buf, curr);
@@ -73,7 +73,7 @@ simpstrg simpstrg::operator+=(const simpstrg& s) {
     tmpbuf[curr += s.curr] = 0;
     delete [] buf;
     buf = tmpbuf;
-  } else {  // max == kDefSize
+  } else {  // max == kMaxStringLength
     max = curr + s.curr;
     buf = new char[max + 1];
     memcpy(buf, defbuf, curr);
@@ -89,10 +89,11 @@ simpstrg simpstrg::operator+=(const char* buf) {
 
 simpstrg simpstrg::operator+(const simpstrg& s) const {
   simpstrg tmps;
-  if ((tmps.curr = curr + s.curr) > kDefSize) {
+  if ((tmps.curr = curr + s.curr) > kMaxStringLength) {
     tmps.max = tmps.curr;
   }
-  tmps.buf = (tmps.curr > kDefSize ? new char[tmps.curr + 1] : tmps.defbuf);
+  tmps.buf = (tmps.curr > kMaxStringLength ?
+      new char[tmps.curr + 1] : tmps.defbuf);
   memcpy(tmps.buf, buf, curr);
   memcpy(tmps.buf + curr, s.buf, s.curr + 1);
   return tmps;
@@ -128,7 +129,7 @@ int simpstrg::operator!=(const char* s) const {
 
 simpstrg simpstrg::operator()(int start, int length) const {
   // Return a null string if start is larger than the string length.
-  if (start >= curr) {
+  if (start > 0 && start >= curr) {
     return simpstrg();
   }
 
@@ -165,22 +166,22 @@ notype simpstrg::operator const char *() const {
   return buf;
 }
 
-istream& operator>>(istream& s, simpstrg& x) {
+std::istream& operator>>(std::istream& s, simpstrg& x) {
   x = "";
   char c;
   int done = 0;
   while (!done) {
-    char buf[kDefSize];
-    s.get(buf, kDefSize, '\n');
+    char buf[kMaxStringLength];
+    s.get(buf, kMaxStringLength, '\n');
     done = (!(s.get(c) && c != '\n'));
     x += buf;
   }
   return s;
 }
 
-ostream& operator<<(ostream& s, const char* buf) {
-  s << buf;
-  return s;
+std::ostream& operator<<(std::ostream& o, const simpstrg& s) {
+  o << s.buf;
+  return o;
 }
 
 #undef notype

@@ -25,13 +25,13 @@
 #endif
 
 #ifdef WIN95
-#define Ifstream(v, f) ifstream v(f, ios::binary)
-#define Ofstream(v, f) ofstream v(f, ios::binary)
+#define Ifstream(v, f) std::ifstream v(f, ios::binary)
+#define Ofstream(v, f) std::ofstream v(f, ios::binary)
 #define Open(f) open(f, ios::binary)
 #define Getline(b, s) getline(b, s, '\n')
 #else
-#define Ifstream(v, f) ifstream v(f)
-#define Ofstream(v, f) ofstream v(f)
+#define Ifstream(v, f) std::ifstream v(f)
+#define Ofstream(v, f) std::ofstream v(f)
 #define Open(f) open(f)
 #define Getline(b, s) getline(b, s)
 #endif

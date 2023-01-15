@@ -1,25 +1,20 @@
 #ifndef SIMPSTRG_H_
 #define SIMPSTRG_H_
 
-#include <string.h>
+#include <cstring>
 #include <cstdio>
 #include <iostream>
 
-using std::istream;
-using std::ostream;
-
-// __________________________________________________________________________
-
-#define kDefSize 80
+#define kMaxStringLength 80
 
 class simpstrg {
-  friend istream& operator>>(istream& s, simpstrg& x);
-  friend ostream& operator<<(ostream& s, const simpstrg& x);
+  friend std::istream& operator>>(std::istream& s, simpstrg& x);
+  friend std::ostream& operator<<(std::ostream& s, const simpstrg& x);
 
  private:
   unsigned int curr;
   unsigned int max;
-  char defbuf[kDefSize + 1];
+  char defbuf[kMaxStringLength + 1];
   char* buf;
 
  public:

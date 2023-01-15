@@ -3,8 +3,7 @@
 
 // __________________________________________________________________________
 // Basic 1-dimensional array
-
-using std::ifstream;
+// Requires #include of "includes.h" to define Ifstream
 
 #include <cassert>
 #include <fstream>
@@ -55,7 +54,7 @@ class vector {
     return maxi;
   }
 
-  vector<T>& operator<<(vector &v);
+  vector<T>& operator<<(vector *v);
   int read(const char* file);
 };
 
@@ -80,17 +79,15 @@ int vector<T>::read(const char *file) {
 }
 
 // __________________________________________________________________________
-// Set a grid equal to 'v'; obliterate 'v'.
+// Set a grid equal to '*v'; obliterate '*v'.
 
 template<class T>
-vector<T>& vector<T>::operator<<(vector &v) {
-/*
-  if (this != &v) {
+vector<T>& vector<T>::operator<<(vector *v) {
+  if (this != v) {
     delete [] sto;
-    nx = v.nx; sto = v.sto;
-    v.sto = 0; v.nx = 0;
+    nx = v->nx; sto = v->sto;
+    v->sto = 0; v->nx = 0;
   }
-*/
   return *this;
 }
 

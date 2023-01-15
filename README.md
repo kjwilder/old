@@ -4,3 +4,4 @@
 - The initial commit contains exact copies of the code I used in the 1990's.
 - The latest commits contain code that should work with modern (as of 2022) C++
   compilers, not that anyone would want to use it.
+- Tests indicate typical usages.
