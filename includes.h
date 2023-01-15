@@ -1,8 +1,8 @@
-#ifndef INCLUDES_H
-#define INCLUDES_H
+#ifndef INCLUDES_H_
+#define INCLUDES_H_
 
 // __________________________________________________________________________
-// This file contains stuff which ought to be included in every header 
+// This file contains stuff that ought to be included in every header
 // and source file.
 
 #include <math.h>
@@ -19,7 +19,7 @@
 #ifndef INTEL
 #define INTEL
 #endif
-#define rint(x) (int)((x) + 0.5)
+#define rint(x) static_cast<int>((x) + 0.5)
 #define near nearr
 #define far farr
 #endif
@@ -47,7 +47,7 @@
 #define FUZZ 0.001
 
 const int Sint = sizeof(int);
-const int Slong = sizeof(long);
+const int Slong = sizeof(int64_t);
 const int Sfloat = sizeof(float);
 const int Sdouble = sizeof(double);
 
@@ -65,8 +65,8 @@ const int Sdouble = sizeof(double);
 { for (int vr_i = sizeof(v) - 1; vr_i >= 0; --vr_i) \
   s.read(((char * const) &v) + vr_i, 1); }
 #else
-#define varwrite(s, v) s.write((char * const) &v, sizeof(v)); 
-#define varread(s, v) s.read((char * const) &v, sizeof(v)); 
+#define varwrite(s, v) s.write((char * const) &v, sizeof(v));
+#define varread(s, v) s.read((char * const) &v, sizeof(v));
 #endif
 
 #define arraywrite(s, v, n) \
@@ -95,43 +95,37 @@ const double SQ2   = 1.414213562;
 
 typedef unsigned char uchar;
 typedef unsigned int uint;
-typedef short unsigned int suint;
-typedef unsigned long ulong;
+typedef uint16_t suint;
+typedef uint64_t ulong;
 
 char *basename(char *name);
-char *ltos(const long x);
 
 // __________________________________________________________________________
 
 template <class T>
-inline double distance(const T x1, const T y1, const T x2, const T y2)
-{
+inline double distance(const T x1, const T y1, const T x2, const T y2) {
   return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
 // __________________________________________________________________________
 
-inline double linfdist(const double x1, const double y1, 
-                       const double x2, const double y2)
-{
+inline double linfdist(const double x1, const double y1,
+                       const double x2, const double y2) {
   return MAX(fabs(x2 - x1), fabs(y2 - y1));
 }
 
-inline int linfdist(int x1, int y1, int x2, int y2)
-{
+inline int linfdist(int x1, int y1, int x2, int y2) {
   return MAX(abs(x2 - x1), abs(y2 - y1));
 }
 
 // __________________________________________________________________________
 
-inline double distance_squared(const double x1, const double y1, 
-                               const double x2, const double y2)
-{
+inline double distance_squared(const double x1, const double y1,
+                               const double x2, const double y2) {
   return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
 }
 
-inline int distance_squared(int x1, int y1, int x2, int y2)
-{
+inline int distance_squared(int x1, int y1, int x2, int y2) {
   return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
 }
 
@@ -139,8 +133,7 @@ inline int distance_squared(int x1, int y1, int x2, int y2)
 // This apparently works even if (x1, y1) == (x2, y2)
 
 template <class T>
-inline double angle(const T x1, const T y1, const T x2, const T y2)
-{
+inline double angle(const T x1, const T y1, const T x2, const T y2) {
   return atan2(y1 - y2, x2 - x1);
 }
 
@@ -148,8 +141,7 @@ inline double angle(const T x1, const T y1, const T x2, const T y2)
 // Swap the contents of 'a' and 'b'.  Requires operator=().
 
 template <class T>
-inline void swap(T& a, T& b)
-{
+inline void swap(T& a, T& b) {
   T tmp;
   tmp = a;
   a = b;
@@ -167,5 +159,5 @@ inline void swap(T& a, T& b)
 
 // __________________________________________________________________________
 
-#endif // INCLUDES_H
+#endif  // INCLUDES_H_
 

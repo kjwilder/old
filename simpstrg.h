@@ -1,37 +1,33 @@
-#ifndef SIMPSTRG_H
-#define SIMPSTRG_H
+#ifndef SIMPSTRG_H_
+#define SIMPSTRG_H_
 
-// __________________________________________________________________________
-// Include files
-
-#include <iostream>
 #include <string.h>
 #include <cstdio>
+#include <iostream>
 
 using std::istream;
 using std::ostream;
 
 // __________________________________________________________________________
 
-#define defsize 80
+#define kDefSize 80
 
-class simpstrg
-{
+class simpstrg {
   friend istream& operator>>(istream& s, simpstrg& x);
   friend ostream& operator<<(ostream& s, const simpstrg& x);
 
  private:
   unsigned int curr;
   unsigned int max;
-  char defbuf[defsize + 1];
+  char defbuf[kDefSize + 1];
   char* buf;
 
  public:
   // Constructors
   simpstrg();
   simpstrg(const simpstrg &s);
-  simpstrg(const char* s);
-  simpstrg(const int n);
+  explicit simpstrg(const char* s);
+  explicit simpstrg(const int n);
 
   // Destructor
   ~simpstrg();
@@ -43,6 +39,7 @@ class simpstrg
   // Concatentation
   simpstrg operator+(const simpstrg& s) const;
   simpstrg operator+=(const simpstrg& s);
+  simpstrg operator+=(const char* buf);
 
   // Operator ==
   int operator==(const simpstrg& s) const;
@@ -57,8 +54,5 @@ class simpstrg
   operator const char *() const;
 };
 
-// __________________________________________________________________________
-// simpstrg.h
-
-#endif // SIMPSTRG_H
+#endif  // SIMPSTRG_H_
 

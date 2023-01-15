@@ -1,5 +1,5 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef VECTOR_H_
+#define VECTOR_H_
 
 // __________________________________________________________________________
 // Basic 1-dimensional array
@@ -11,25 +11,29 @@ using std::ifstream;
 #include <iostream>
 
 template <class T>
-class vector
-{
+class vector {
  private:
   int nx;
   T* sto;
-  
+
   vector(const vector& v);
-  
+
  public:
-  vector(int x = 0) : nx(x) { assert(x >= 0); sto = (x == 0 ? 0 : new T[x]); }
+  explicit vector(int x = 0) : nx(x) {
+    assert(x >= 0); sto = (x == 0 ? 0 : new T[x]);
+  }
   ~vector() { delete [] sto; }
 
   int dim() const { return nx; }
-  void init(int x = 0) { assert(x >= 0);
-    if (sto != 0) delete [] sto; nx = x; sto = (x == 0 ? 0 : new T[x]); 
+  void init(int x = 0) {
+    assert(x >= 0);
+    if (sto != 0) {
+      delete [] sto; nx = x; sto = (x == 0 ? 0 : new T[x]);
+    }
   }
   operator T*() const { return sto; }
   T& operator()(int x) const { assert(x >= 0 && x < nx); return sto[x]; }
-  void operator=(const vector& v) { 
+  void operator=(const vector& v) {
     assert(nx == v.nx);
     memcpy(sto, v.sto, nx * sizeof(T));
   }
@@ -37,8 +41,8 @@ class vector
     assert(nx == v.nx);
     for (int i = 0; i < nx; ++i) sto[i] += v.sto[i];
   }
-  void clear(const T& val = 0) { 
-    for (int i = 0; i < nx; ++i) sto[i] = val; 
+  void clear(const T& val = 0) {
+    for (int i = 0; i < nx; ++i) sto[i] = val;
   }
   int maxind() const {
     int maxi = 0;
@@ -52,36 +56,34 @@ class vector
   }
 
   vector<T>& operator<<(vector &v);
-  int read(const char* file);//Andrew adds this at Ken's suggestion 8/12/99
-
-}; // class vector
+  int read(const char* file);
+};
 
 // __________________________________________________________________________
 // Read in text data into a vector.  The file should begin with an
 // integer indicating the size of the vector.
 
 template<class T>
-int vector<T>::read(const char *file)
-{
-  Ifstream (ifs, file);
-  if (!ifs)
+int vector<T>::read(const char *file) {
+  Ifstream(ifs, file);
+  if (!ifs) {
     return 0;
-  
+  }
+
   int dim;
   ifs >> dim;
   (*this) = vector<T>(dim);
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     ifs >> (*this)[i];
+  }
   return 1;
-
-} // vector::read
+}
 
 // __________________________________________________________________________
 // Set a grid equal to 'v'; obliterate 'v'.
 
 template<class T>
-vector<T>& vector<T>::operator<<(vector &v)
-{
+vector<T>& vector<T>::operator<<(vector &v) {
 /*
   if (this != &v) {
     delete [] sto;
@@ -90,8 +92,7 @@ vector<T>& vector<T>::operator<<(vector &v)
   }
 */
   return *this;
-
-} // vector::operator<<
+}
 
 // __________________________________________________________________________
 // Basic defines
@@ -100,7 +101,7 @@ typedef vector<char> cvector;
 typedef vector<unsigned char> ucvector;
 typedef vector<int> ivector;
 typedef vector<unsigned int> uivector;
-typedef vector<long> lvector;
+typedef vector<uint64_t> lvector;
 typedef vector<float> fvector;
 typedef vector<double> dvector;
 typedef vector<cvector> cvectors;
@@ -114,4 +115,4 @@ typedef vector<dvector> dvectors;
 // __________________________________________________________________________
 // vector.h
 
-#endif
+#endif  // VECTOR_H_

@@ -1,12 +1,9 @@
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef TIMER_H_
+#define TIMER_H_
 
 #include <ctime>
 
-// __________________________________________________________________________
-
-class timer
-{
+class timer {
  private:
   int running;
   double accumulated_time;
@@ -24,10 +21,6 @@ class timer
   void stop(const char* timer_name = 0);
   double elapsed_time();
   double check(const char* timer_name = 0);
+};
 
-}; // class timer
-
-// __________________________________________________________________________
-// timer.h
-
-#endif // TIMER_H
+#endif  // TIMER_H_
