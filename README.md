@@ -1,7 +1,9 @@
-## Obsolete but perhaps slightly historically interesting C++ code.
-- I wrote all of this code circa 1996 after STL publication but prior to
-  available implementations.
-- The initial commit contains exact copies of the code I used in the 1990's.
-- The latest commits contain code that should work with modern (as of 2022) C++
-  compilers, not that anyone would want to use it.
-- Tests indicate typical usages.
+## Obsolete somewhat historically interesting C++ code.
+- I wrote these libraries circa 1996 but mostly switched to using STL
+  implementations in the early 2000's.
+- I wrote these libraries after g++ supported templates but before it had
+  a good and widely available STL implementation.
+- The initial commit contains exact copies of my working code from the 1990's.
+  It will not compile with a modern C++ compiler.
+- Later commits include tests and updates to make the code compile with newer
+  compilers.
