@@ -7,3 +7,11 @@
   It will not compile with a modern C++ compiler.
 - Later commits include tests and updates to make the code compile with newer
   compilers.
+
+### About `avlgrid.h`
+- The standard library `set` provides equivalent and additional functionality
+  with better performance.
+- This implementation was designed for a specific purpose: Insert and store a
+  large list of items. The items are kept sorted, and insertions are O(log(n)).
+- The main function is `insert`, which will insert a new item iff it is not
+  equal to any item previously inserted.
