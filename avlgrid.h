@@ -1,55 +1,48 @@
 #ifndef AVLGRID_H_
 #define AVLGRID_H_
 
-#include <cstdlib>
-#include "grid.h"
-#include "vector.h"
+#include <iostream>
+#include <vector>
 
-const int defavlsize = 100;
-
-enum balfactor { LH, EH, RH };
+enum balancefactor { LH, EH, RH };
 
 template <class T>
-class avlgrid : public grid<T> {
+class avlvector : public std::vector<T> {
  private:
-  int numnodes;
-  int rootnode;
-  igrid parent, left, right;
-  vector<balfactor> bal;
+  int root;
+  std::vector<int> parent, left, right;
+  std::vector<balancefactor> bal;
 
-  void rotleft(int currnode);
-  void rotright(int currnode);
-  void rightbalance(int currnode);
-  void leftbalance(int currnode);
-  int comparenode(int curr, const vector<T>& newT);
+  void rotate_left(int ind);
+  void rotate_right(int ind);
+  void balance_right(int ind);
+  void balance_left(int ind);
+  int compare_node(int curr, const T& newT);
   int first() const;
   int last() const;
-  int prev(int curr) const;
-  int next(int curr) const;
-  int startsearch(T dist, int currnode);
+  int prev(int ind) const;
+  int next(int ind) const;
+  // int start_search(T dist, int ind);
 
-  int checkfamily() const;
-  int checkbalances(int currnode = -2) const;
-  int depth(int currnode = -2) const;
+  bool familially_consistent() const;
+  bool balanced(int ind = -2) const;
+  int depth(int ind = -2) const;
 
-  int invariant() const;
+  bool invariant() const;
 
  public:
-  avlgrid() : numnodes(0), rootnode(-1) { }
-  explicit avlgrid(int x) : grid<T>(x), numnodes(0), rootnode(-1),
-    parent(x), left(x), right(x), bal(x) { }
-  avlgrid(int x, int  y) : grid<T>(x, y), numnodes(0), rootnode(-1),
-    parent(x), left(x), right(x), bal(x) { }
-  ~avlgrid() { }
-
-  void init(int x, int y = 0) {
-    grid<T>::init(x, y); numnodes = 0; rootnode = -1;
-    parent.init(x); left.init(x); right.init(x); bal.init(x);
+  avlvector() : root(-1) { }
+  explicit avlvector(int x) : root(-1) {
+    this->reserve(x);
+    parent.reserve(x);
+    left.reserve(x);
+    right.reserve(x);
+    bal.reserve(x);
   }
-  void reinit() { numnodes = 0; rootnode = -1; }
+  ~avlvector() { }
 
-  int tooclose(const vector<T>& newT, T dist);
-  int insert(const vector<T>& newT, int allowdups = 0, int top = -1);
+  // bool close(const T& newT, T dist);
+  bool insert(const T& newT, int top = -1);
 
   void dump() const;
   void dump_rev() const;
@@ -58,332 +51,317 @@ class avlgrid : public grid<T> {
 // __________________________________________________________________________
 
 template <class T>
-int avlgrid<T>::comparenode(int curr, const vector<T>& newT) {
-  assert(this->cols() == newT.dim());
-  for (int i = 0; i < this->cols(); ++i) {
-    if ((*this)(curr, i) < newT[i])
-      return 1;
-    if ((*this)(curr, i) > newT[i])
-      return -1;
-  }
+int avlvector<T>::compare_node(int curr, const T& newT) {
+  if ((*this)[curr] < newT)
+    return 1;
+  if ((*this)[curr] > newT)
+    return -1;
   return 0;
 }
 
 // __________________________________________________________________________
+// Insert an element into a tree. Users call this with only one argument,
+// the item to insert, and should ignore the return value that indicates if
+// the depth of a tree (or sub-tree) increased and is used for rebalancing.
 
 template <class T>
-int avlgrid<T>::insert(const vector<T>& newT, int allowdups, int currnode) {
-  if (this->rows() == 0)
-    init(defavlsize, newT.dim());
-
-  assert(newT.dim() == this->cols());
-
-  // Expand the grid if necessary
-  if (numnodes == this->rows()) {
-    grid<T> tmp(this->rows() * 2, this->cols());
-    igrid nparent(this->rows() * 2);
-    igrid nleft(this->rows() * 2);
-    igrid nright(this->rows() * 2);
-    vector<balfactor> nbal(this->rows() * 2);
-
-    for (int i = 0; i < this->rows(); ++i) {
-      for (int j = 0; j < this->cols(); ++j)
-        tmp(i, j) = (*this)(i, j);
-      nparent(i) = parent(i);
-      nleft(i) = left(i);
-      nright(i) = right(i);
-      nbal(i) = bal(i);
-    }
-    (*this) << tmp;
-    (*this).parent << nparent;
-    (*this).left << nleft;
-    (*this).right << nright;
-    (*this).bal << &nbal;
-  }
+bool avlvector<T>::insert(const T& newT, int ind) {
+  // Uncomment the next line only if intensively debugging.
+  // assert(invariant());
 
   // Handle the case when the tree is empty
-  if (numnodes == 0) {
-    rootnode = 0;
-    parent(0) = left(0) = right(0) = -1;
-    bal[0] = EH;
-    for (int i = 0; i < this->cols(); ++i)
-      (*this)(0, i) = newT[i];
-    numnodes = 1;
-    return 1;
+  if (this->size() == 0) {
+    root = 0;
+    parent.push_back(-1);
+    left.push_back(-1);
+    right.push_back(-1);
+    bal.push_back(EH);
+    this->push_back(newT);
+    return true;
   }
 
-  // When not called recursively, the currnode is the root of the tree
-  if (currnode == -1)
-    currnode = rootnode;
+  // When not called recursively, the ind is the root of the tree
+  if (ind == -1)
+    ind = root;
 
   // Return with no height change if newT is already in the tree
-  int compare = comparenode(currnode, newT);
-  if (compare == 0 && allowdups == 0)
-    return 0;
+  int compare = compare_node(ind, newT);
+  if (compare == 0)
+    return false;
 
   // Recursively insert to the left if newT is less then the current node
   int taller = 0;
   if (compare == -1) {
-    if (left(currnode) == -1) {
-      left(currnode) = numnodes;
-      parent(numnodes) = currnode;
-      left(numnodes) = right(numnodes) = -1;
-      bal[numnodes] = EH;
-      for (int i = 0; i < this->cols(); ++i)
-        (*this)(numnodes, i) = newT[i];
-      ++numnodes;
-      taller = 1;
+    if (left[ind] == -1) {
+      left[ind] = this->size();
+      parent.push_back(ind);
+      left.push_back(-1);
+      right.push_back(-1);
+      bal.push_back(EH);
+      this->push_back(newT);
+      taller = true;
     } else {
-      taller = insert(newT, allowdups, left(currnode));
+      taller = insert(newT, left[ind]);
     }
-    if (taller) {
-      switch (bal[currnode]) {
-        case LH:
-          leftbalance(currnode);
-          return 0;
-        case EH:
-          bal[currnode] = LH;
-          return 1;
-        case RH:
-          bal[currnode] = EH;
-          return 0;
-      }
-    } else {
-      return 0;
+    if (!taller)
+      return false;
+    switch (bal[ind]) {
+     case LH:
+      balance_left(ind);
+      return false;
+     case EH:
+      bal[ind] = LH;
+      return true;
+     case RH:
+      bal[ind] = EH;
+      return false;
     }
   } else {
-    if (right(currnode) == -1) {
-      right(currnode) = numnodes;
-      parent(numnodes) = currnode;
-      left(numnodes) = right(numnodes) = -1;
-      bal[numnodes] = EH;
-      for (int i = 0; i < this->cols(); ++i)
-        (*this)(numnodes, i) = newT[i];
-      ++numnodes;
-      taller = 1;
+    if (right[ind] == -1) {
+      right[ind] = this->size();
+      parent.push_back(ind);
+      left.push_back(-1);
+      right.push_back(-1);
+      bal.push_back(EH);
+      this->push_back(newT);
+      taller = true;
     } else {
-      taller = insert(newT, allowdups, right(currnode));
+      taller = insert(newT, right[ind]);
     }
-    if (taller) {
-      switch (bal[currnode]) {
-       case LH:
-        bal[currnode] = EH;
-        return 0;
-       case EH:
-        bal[currnode] = RH;
-        return 1;
-       case RH:
-        rightbalance(currnode);
-        return 0;
-      }
-    } else {
-      return 0;
+    if (!taller)
+      return false;
+    switch (bal[ind]) {
+     case LH:
+      bal[ind] = EH;
+      return false;
+     case EH:
+      bal[ind] = RH;
+      return true;
+     case RH:
+      balance_right(ind);
+      return false;
     }
   }
-
-  return 0;
+  return false;
 }
 
 // __________________________________________________________________________
 // Check whether newT is within L1 distance 'dist' of existing nodes
 
+/*
 template <class T>
-int avlgrid<T>::startsearch(T min, int currnode) {
-  assert(currnode != -1);
+int avlvector<T>::start_search(T min, int ind) {
+  assert(ind != -1);
 
-  if (right(currnode) != -1 && (*this)(currnode, 0) < min)
-    return startsearch(min, right(currnode));
+  if (right[ind] != -1 && (*this)[ind] < min)
+    return start_search(min, right[ind]);
 
-  if (left(currnode) != -1 && (*this)(currnode, 0) >= min)
-    return startsearch(min, left(currnode));
+  if (left[ind] != -1 && (*this)[ind] >= min)
+    return start_search(min, left[ind]);
 
-  return currnode;
+  return ind;
 }
+*/
 
 // __________________________________________________________________________
 // Check whether newT is within L1 distance 'dist' of existing nodes
 
+/*
 template <class T>
-int avlgrid<T>::tooclose(const vector<T>& newT, T dist) {
+bool avlvector<T>::close(const T& newT, T dist) {
   // Return if the tree is empty
-  if (rootnode == -1)
-    return 0;
+  if (root == -1)
+    return false;
 
   // Return if dist == 0.  Don't worry about duplicates as the
   // the insert routine handles them correctly.
   if (dist == 0)
-    return 0;
+    return false;
 
-  T max, newmax;
-  int curr = startsearch(newT[0] < dist ? 0 : newT[0] - dist, rootnode);
-  while (curr != -1 && (*this)(curr, 0) <= newT[0] + dist) {
-    max = 0;
-    const int len = this->cols();
-    for (int i = 0; i < len; ++i) {
-      newmax = abs(newT[i] - (*this)(curr, i));
+  int curr = start_search(newT < dist ? 0 : newT - dist, root);
+  while (curr != -1 && (*this)[curr] <= newT + dist)
+  {
+    T max = 0;
+    const int len = dimy();
+    for (int i = 0; i < len; ++i)
+    {
+      T newmax = abs(newT[i] - (*this)(curr, i));
       if (newmax > max)
         max = newmax;
     }
     if (max <= dist)
-      return 1;
+      return true;
     curr = next(curr);
   }
 
-  return 0;
+  return false;
 }
+*/
 
 // __________________________________________________________________________
 
 template <class T>
-void avlgrid<T>::rotleft(int currnode) {
-  assert(currnode >= 0);
-  assert(right(currnode) >= 0);
-  int par = parent(currnode);
-  int rt = right(currnode);
-  int lt = left(rt);
-  left(rt) = currnode;
-  right(currnode) = lt;
-  parent(currnode) = rt;
-  parent(rt) = par;
+void avlvector<T>::rotate_left(int ind) {
+  assert(ind >= 0);
+  assert(right[ind] >= 0);
+  int par = parent[ind];
+  int rt = right[ind];
+  int lt = left[rt];
+  left[rt] = ind;
+  right[ind] = lt;
+  parent[ind] = rt;
+  parent[rt] = par;
   if (lt != -1)
-    parent(lt) = currnode;
+    parent[lt] = ind;
   if (par == -1) {
-    rootnode = rt;
+    root = rt;
   } else {
-    assert((right(par) == currnode && left(par) != currnode) ||
-           (right(par) != currnode && left(par) == currnode));
-    if (right(par) == currnode) {
-      right(par) = rt;
-    } else {
-      left(par) = rt;
-    }
+    assert((right[par] == ind && left[par] != ind) ||
+           (right[par] != ind && left[par] == ind));
+    if (right[par] == ind)
+      right[par] = rt;
+    else
+      left[par] = rt;
   }
-  assert(checkfamily());
+  assert(familially_consistent());
 }
 
 // __________________________________________________________________________
 
 template <class T>
-void avlgrid<T>::rotright(int currnode) {
-  assert(currnode >= 0);
-  assert(left(currnode) >= 0);
-  int par = parent(currnode);
-  int lt = left(currnode);
-  int rt = right(lt);
-  right(lt) = currnode;
-  left(currnode) = rt;
-  parent(currnode) = lt;
-  parent(lt) = par;
+void avlvector<T>::rotate_right(int ind) {
+  assert(ind >= 0);
+  assert(left[ind] >= 0);
+  int par = parent[ind];
+  int lt = left[ind];
+  int rt = right[lt];
+  right[lt] = ind;
+  left[ind] = rt;
+  parent[ind] = lt;
+  parent[lt] = par;
   if (rt != -1)
-    parent(rt) = currnode;
+    parent[rt] = ind;
   if (par == -1) {
-    rootnode = lt;
+    root = lt;
   } else {
-    assert((right(par) == currnode && left(par) != currnode) ||
-           (right(par) != currnode && left(par) == currnode));
-    if (right(par) == currnode) {
-      right(par) = lt;
-    } else {
-      left(par) = lt;
-    }
+    assert((right[par] == ind && left[par] != ind) ||
+           (right[par] != ind && left[par] == ind));
+    if (right[par] == ind)
+      right[par] = lt;
+    else
+      left[par] = lt;
   }
-  assert(checkfamily());
+  assert(familially_consistent());
 }
 
 // __________________________________________________________________________
+// Right-balance the (sub-)tree whose root element has the provided index.
 
 template <class T>
-void avlgrid<T>::rightbalance(int currnode) {
-  int rt = right(currnode);
-  int lt = left(rt);
+void avlvector<T>::balance_right(int ind) {
+  int rt = right[ind];
+  int lt = left[rt];
   switch (bal[rt]) {
     case RH:
-      bal[currnode] = bal[rt] = EH;
-      rotleft(currnode);
+      bal[ind] = bal[rt] = EH;
+      rotate_left(ind);
       break;
     case EH:
-      cerr << "Attempting to right balance an equal height branch\n";
+      std::cerr << "Attempting to right balance an equal height branch\n";
       exit(1);
       break;
     case LH:
       switch (bal[lt]) {
         case EH:
-          bal[currnode] = EH;
+          bal[ind] = EH;
           bal[rt] = EH;
           break;
         case LH:
-          bal[currnode] = EH;
+          bal[ind] = EH;
           bal[rt] = RH;
           break;
         case RH:
-          bal[currnode] = LH;
+          bal[ind] = LH;
           bal[rt] = EH;
           break;
-       }
-       bal[lt] = EH;
-       rotright(rt);
-       rotleft(currnode);
-       break;
+      }
+      bal[lt] = EH;
+      rotate_right(rt);
+      rotate_left(ind);
+      break;
   }
 }
 
 // __________________________________________________________________________
+// Left-balance the (sub-)tree whose root element has the provided index.
 
 template <class T>
-void avlgrid<T>::leftbalance(int currnode) {
-  int lt = left(currnode);
-  int rt = right(lt);
+void avlvector<T>::balance_left(int ind) {
+  int lt = left[ind];
+  int rt = right[lt];
   switch (bal[lt]) {
     case RH:
       switch (bal[rt]) {
         case EH:
-          bal[currnode] = EH;
+          bal[ind] = EH;
           bal[lt] = EH;
           break;
         case RH:
-          bal[currnode] = EH;
+          bal[ind] = EH;
           bal[lt] = LH;
           break;
         case LH:
-          bal[currnode] = RH;
+          bal[ind] = RH;
           bal[lt] = EH;
           break;
       }
       bal[rt] = EH;
-      rotleft(lt);
-      rotright(currnode);
+      rotate_left(lt);
+      rotate_right(ind);
       break;
     case EH:
-      cerr << "Attempting to left balance an equal height branch\n";
+      std::cerr << "Attempting to left balance an equal height branch\n";
       exit(1);
     case LH:
-      bal[currnode] = bal[lt] = EH;
-      rotright(currnode);
+      bal[ind] = bal[lt] = EH;
+      rotate_right(ind);
       break;
   }
 }
 
 // __________________________________________________________________________
-// Dump an avlgrid.
+// Dump an avlvector.
 
 template <class T>
-void avlgrid<T>::dump() const {
+void dumpbase(const T& t) {
+  std::cout << t << std::endl;
+}
+
+template <class V>
+void dumpbase(const std::vector<V> v) {
+  for (int i = 0; i < v.size() - 1; ++i) {
+    std::cout << v[i] << " ";
+  }
+  if (v.size() > 0) {
+    std::cout << v[v.size() - 1];
+  }
+  std::cout << std::endl;
+}
+
+template <class T>
+void avlvector<T>::dump() const {
   for (int i = first(); i != -1; i = next(i)) {
-    for (int j = 0; j < this->cols(); ++j)
-      cout << (*this)(i, j) << " ";
-    cout << endl;
+    dumpbase((*this)[i]);
   }
 }
 
 // __________________________________________________________________________
-// Dump an avlgrid in reverse order.
+// Dump an avlvector in reverse order.
 
 template <class T>
-void avlgrid<T>::dump_rev() const {
+void avlvector<T>::dump_rev() const {
   for (int i = last(); i != -1; i = prev(i)) {
-    for (int j = 0; j < this->cols(); ++j)
-      cout << (*this)(i, j) << " ";
-    cout << endl;
+    std::cout << (*this)[i] << std::endl;
   }
 }
 
@@ -391,160 +369,145 @@ void avlgrid<T>::dump_rev() const {
 // Consistency checks.
 
 template <class T>
-int avlgrid<T>::invariant() const {
-  if (checkfamily() && checkbalances()) {
-    return 1;
-  }
-  return 0;
+bool avlvector<T>::invariant() const {
+  return familially_consistent() && balanced();
 }
 
 // __________________________________________________________________________
 // Check that parents and children are consistent.
 
 template <class T>
-int avlgrid<T>::checkfamily() const {
-  for (int i = 0; i < numnodes; ++i) {
-    int par = parent(i);
-    if (par != -1 && left(par) != i && right(par) != i)
-      return 0;
+bool avlvector<T>::familially_consistent() const {
+  for (int i = 0; i < this->size(); ++i) {
+    const int p = parent[i];
+    if (p != -1 && left[p] != i && right[p] != i)
+      return false;
 
-    int lef = left(i);
-    if (lef != -1 && parent(lef) != i)
-      return 0;
+    const int l = left[i];
+    if (l != -1 && parent[l] != i)
+      return false;
 
-    int rig = right(i);
-    if (rig != -1 && parent(rig) != i)
-      return 0;
+    const int r = right[i];
+    if (r != -1 && parent[r] != i)
+      return false;
   }
-  return 1;
+  return true;
 }
 
 // __________________________________________________________________________
-// Check that avl tree is properly balanced
-// This is a very expensive routine.
+// Check the tree is properly recursively balanced.  This function is
+// intended for debugging and is computationally expensive.
 
 template <class T>
-int avlgrid<T>::checkbalances(int currnode) const {
-  if (currnode == -2)
-    currnode = rootnode;
+bool avlvector<T>::balanced(int ind) const {
+  if (ind == -2)
+    ind = root;
 
-  if (currnode == -1)
-    return 1;
+  if (ind == -1)
+    return true;
 
-  int leftdepth = depth(left(currnode));
-  int rightdepth = depth(right(currnode));
-  if (abs(leftdepth - rightdepth) > 1)
-    return 0;
+  int left_depth = depth(left[ind]);
+  int right_depth = depth(right[ind]);
+  if (abs(left_depth - right_depth) > 1)
+    return false;
 
-  if (rightdepth - leftdepth + 1 != bal[currnode])
-    return 0;
+  if (right_depth - left_depth + 1 != bal[ind])
+    return false;
 
-  if (!checkbalances(right(currnode)) || !checkbalances(left(currnode)))
-    return 0;
-
-  return 1;
+  return balanced(right[ind]) && balanced(left[ind]);
 }
 
 // __________________________________________________________________________
-// Calculate depth of a node
+// Calculate the depth of an element given its index.
 
 template <class T>
-int avlgrid<T>::depth(int currnode) const {
-  if (currnode == -2)
-    currnode = rootnode;
+int avlvector<T>::depth(int ind) const {
+  if (ind == -2)
+    ind = root;
 
-  if (currnode == -1)
+  if (ind == -1)
     return 0;
 
-  int leftdepth = 1 + depth(left(currnode));
-  int rightdepth = 1 + depth(right(currnode));
+  int left_depth = 1 + depth(left[ind]);
+  int right_depth = 1 + depth(right[ind]);
 
-  return (leftdepth > rightdepth ? leftdepth : rightdepth);
+  return (left_depth > right_depth ? left_depth : right_depth);
 }
 
 // __________________________________________________________________________
-// Calculate the smallest element in the tree
+// Calculate the index of the first (smallest) element in the tree.
 
 template <class T>
-int avlgrid<T>::first() const {
-  if (rootnode == -1)
+int avlvector<T>::first() const {
+  if (root == -1)
     return -1;
 
-  int i = rootnode;
-  while (left(i) != -1)
-    i = left(i);
+  int i = root;
+  while (left[i] != -1)
+    i = left[i];
 
   return i;
 }
 
 // __________________________________________________________________________
-// Calculate the largest element in the tree
+// Calculate the index of the last (largest) element in the tree.
 
 template <class T>
-int avlgrid<T>::last() const {
-  if (rootnode == -1)
+int avlvector<T>::last() const {
+  if (root == -1)
     return -1;
 
-  int i = rootnode;
-  while (right(i) != -1)
-    i = right(i);
+  int i = root;
+  while (right[i] != -1)
+    i = right[i];
 
   return i;
 }
 
 // __________________________________________________________________________
-// Calculate the next element in a tree
+// Calculate the index of the next element in a tree.
 
 template <class T>
-int avlgrid<T>::next(int curr) const {
-  assert(curr >= 0);
+int avlvector<T>::next(int ind) const {
+  assert(ind >= 0);
 
-  if (right(curr) != -1) {
-    curr = right(curr);
-    while (left(curr) != -1)
-      curr = left(curr);
-    return curr;
+  if (right[ind] != -1) {
+    ind = right[ind];
+    while (left[ind] != -1)
+      ind = left[ind];
+    return ind;
   }
 
-  if (parent(curr) != -1) {
-    while (parent(curr) != -1 && right(parent(curr)) == curr)
-      curr = parent(curr);
-    return parent(curr);
+  if (parent[ind] != -1) {
+    while (parent[ind] != -1 && right[parent[ind]] == ind)
+      ind = parent[ind];
+    return parent[ind];
   }
 
   return -1;
 }
 
 // __________________________________________________________________________
-// Calculate the previous element in a tree
+// Calculate the index of the previous element in a tree.
 
 template <class T>
-int avlgrid<T>::prev(int curr) const {
-  assert(curr >= 0);
+int avlvector<T>::prev(int ind) const {
+  assert(ind >= 0);
 
-  if (left(curr) != -1) {
-    curr = left(curr);
-    while (right(curr) != -1)
-      curr = right(curr);
-    return curr;
+  if (left[ind] != -1) {
+    ind = left[ind];
+    while (right[ind] != -1)
+      ind = right[ind];
+    return ind;
   }
 
-  if (parent(curr) != -1) {
-    while (parent(curr) != -1 && left(parent(curr)) == curr)
-      curr = parent(curr);
-    return parent(curr);
+  if (parent[ind] != -1) {
+    while (parent[ind] != -1 && left(parent[ind]) == ind)
+      ind = parent[ind];
+    return parent[ind];
   }
 
   return -1;
 }
-
-typedef avlgrid<char> cavlgrid;
-typedef avlgrid<uchar> ucavlgrid;
-typedef avlgrid<int> iavlgrid;
-typedef avlgrid<uint> uiavlgrid;
-typedef avlgrid<int64_t> lavlgrid;
-typedef avlgrid<float> favlgrid;
-typedef avlgrid<double> davlgrid;
 
 #endif  // AVLGRID_H_
-
