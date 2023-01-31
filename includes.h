@@ -5,9 +5,10 @@
 // This file contains stuff that ought to be included in every header
 // and source file.
 
-#include <math.h>
-#include <cstdlib>
+#include <cmath>
 #include <cassert>
+#include <cstdint>
+#include <cstdlib>
 
 #define exitcheck(x, msg) if (x) { cerr << msg << endl; exit(1); }
 
