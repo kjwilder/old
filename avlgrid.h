@@ -10,7 +10,7 @@ template <class T>
 class avlvector : public std::vector<T> {
  private:
   int root;
-  std::vector<int> parent, left, right;
+  std::vector<typename std::vector<T>::size_type> parent, left, right;
   std::vector<balancefactor> bal;
 
   void rotate_left(int ind);
