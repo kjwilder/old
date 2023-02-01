@@ -380,15 +380,19 @@ template <class T>
 bool avlvector<T>::familially_consistent() const {
   for (typename std::vector<T>::size_type i = 0; i < this->size(); ++i) {
     const auto& p = parent[i];
-    if (p != -1 && left[p] != i && right[p] != i)
+    if (p != -1 &&
+        static_cast<typename std::vector<T>::size_type>(left[p]) != i &&
+        static_cast<typename std::vector<T>::size_type>(right[p]) != i)
       return false;
 
     const auto& l = left[i];
-    if (l != -1 && parent[l] != i)
+    if (l != -1 &&
+        static_cast<typename std::vector<T>::size_type>(parent[l]) != i)
       return false;
 
     const auto& r = right[i];
-    if (r != -1 && parent[r] != i)
+    if (r != -1 &&
+        static_cast<typename std::vector<T>::size_type>(parent[r]) != i)
       return false;
   }
   return true;
