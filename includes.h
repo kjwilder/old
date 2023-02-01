@@ -5,9 +5,9 @@
 // This file contains stuff that ought to be included in every header
 // and source file.
 
-#include <math.h>
-#include <cstdlib>
 #include <cassert>
+#include <cmath>
+#include <cstdlib>
 
 #define exitcheck(x, msg) if (x) { cerr << msg << endl; exit(1); }
 
@@ -95,10 +95,6 @@ const double SQ2   = 1.414213562;
 
 typedef unsigned char uchar;
 typedef unsigned int uint;
-typedef uint16_t suint;
-typedef uint64_t ulong;
-
-char *basename(char *name);
 
 // __________________________________________________________________________
 

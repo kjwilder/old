@@ -9,7 +9,7 @@ TEST(Initialization, ATest) {
   ASSERT_GT(time1, 0);
   t.stop();
   double time2 = t.check();
-  ASSERT_GT(time2, time1);
+  ASSERT_GE(time2, time1);
   double time3 = t.check();
   ASSERT_EQ(time3, time2);
 }

@@ -502,7 +502,7 @@ int avlvector<T>::prev(int ind) const {
   }
 
   if (parent[ind] != -1) {
-    while (parent[ind] != -1 && left(parent[ind]) == ind)
+    while (parent[ind] != -1 && left[parent[ind]] == ind)
       ind = parent[ind];
     return parent[ind];
   }
