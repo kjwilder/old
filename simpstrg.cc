@@ -129,7 +129,7 @@ int simpstrg::operator!=(const char* s) const {
 
 simpstrg simpstrg::operator()(int start, int length) const {
   // Return a null string if start is larger than the string length.
-  if (start > 0 && start >= curr) {
+  if (start > 0 && static_cast<unsigned int>(start) >= curr) {
     return simpstrg();
   }
 
@@ -147,7 +147,8 @@ simpstrg simpstrg::operator()(int start, int length) const {
   if (length < 0) {
     length += curr - start + 1;
   }
-  if (length > curr - start) {
+  if (static_cast<unsigned int>(length) >
+      curr - static_cast<unsigned int>(start)) {
     length = curr - start;
   }
 

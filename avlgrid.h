@@ -339,7 +339,7 @@ void dumpbase(const T& t) {
 
 template <class V>
 void dumpbase(const std::vector<V> v) {
-  for (int i = 0; i < v.size() - 1; ++i) {
+  for (typename std::vector<V>::size_type i = 0; i < v.size() - 1; ++i) {
     std::cout << v[i] << " ";
   }
   if (v.size() > 0) {
@@ -378,7 +378,7 @@ bool avlvector<T>::invariant() const {
 
 template <class T>
 bool avlvector<T>::familially_consistent() const {
-  for (int i = 0; i < this->size(); ++i) {
+  for (typename std::vector<T>::size_type i = 0; i < this->size(); ++i) {
     const int p = parent[i];
     if (p != -1 && left[p] != i && right[p] != i)
       return false;
