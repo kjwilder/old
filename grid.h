@@ -2,8 +2,9 @@
 #define GRID_H_
 
 #include <algorithm>
-#include <cstdio>
 #include <cassert>
+#include <cstdio>
+#include <cstring>
 #include <fstream>
 #include <utility>
 
@@ -12,7 +13,6 @@
 // __________________________________________________________________________
 // grid of elements of type T
 
-using std::cout;
 using std::cerr;
 using std::endl;
 using std::ifstream;
@@ -124,8 +124,8 @@ void grid<T>::dump(int max) const {
     max = nc;
   for (int j = 0; j < max; ++j) {
     for (int i = 0; i < nr; ++i)
-      cout << ((*this)(i, j)) << " ";
-    cout << "\n";
+      std::cout << ((*this)(i, j)) << " ";
+    std::cout << "\n";
   }
 }
 
@@ -138,8 +138,8 @@ void grid<T>::dump2(int max) const {
     max = nr;
   for (int i = 0; i < max; ++i) {
     for (int j = 0; j < nc; ++j)
-      cout << ((*this)(i, j)) << " ";
-    cout << "\n";
+      std::cout << ((*this)(i, j)) << " ";
+    std::cout << "\n";
   }
 }
 
