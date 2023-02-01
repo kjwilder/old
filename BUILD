@@ -1,4 +1,11 @@
 cc_test(
+  name = "avlgrid_test",
+  size = "small",
+  srcs = ["includes.h", "avlgrid.h", "grid.h", "vector.h", "tests/avlgrid_test.cc"],
+  deps = [ "@gtest//:gtest_main" ],
+)
+
+cc_test(
   name = "string_test",
   size = "small",
   srcs = ["simpstrg.h", "simpstrg.cc", "tests/simpstrg_test.cc"],
@@ -30,12 +37,5 @@ cc_test(
   name = "grid_test",
   size = "small",
   srcs = ["includes.h", "grid.h", "vector.h", "tests/grid_test.cc"],
-  deps = [ "@gtest//:gtest_main" ],
-)
-
-cc_test(
-  name = "avlgrid_test",
-  size = "small",
-  srcs = ["includes.h", "avlgrid.h", "grid.h", "vector.h", "tests/avlgrid_test.cc"],
   deps = [ "@gtest//:gtest_main" ],
 )
