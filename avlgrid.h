@@ -10,7 +10,7 @@ template <class T>
 class avlvector : public std::vector<T> {
  private:
   int root;
-  std::vector<int> parent, left, right;
+  std::vector<int> parent, left, right;  
   std::vector<balancefactor> bal;
 
   void rotate_left(int ind);
@@ -379,15 +379,15 @@ bool avlvector<T>::invariant() const {
 template <class T>
 bool avlvector<T>::familially_consistent() const {
   for (typename std::vector<T>::size_type i = 0; i < this->size(); ++i) {
-    const int p = parent[i];
+    const auto& p = parent[i];
     if (p != -1 && left[p] != i && right[p] != i)
       return false;
 
-    const int l = left[i];
+    const auto& l = left[i];
     if (l != -1 && parent[l] != i)
       return false;
 
-    const int r = right[i];
+    const auto& r = right[i];
     if (r != -1 && parent[r] != i)
       return false;
   }
