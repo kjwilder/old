@@ -10,7 +10,7 @@ template <class T>
 class avlvector : public std::vector<T> {
  private:
   int root;
-  std::vector<int> parent, left, right;
+  std::vector<int> parent, left, right;  
   std::vector<balancefactor> bal;
 
   void rotate_left(int ind);
@@ -339,7 +339,7 @@ void dumpbase(const T& t) {
 
 template <class V>
 void dumpbase(const std::vector<V> v) {
-  for (int i = 0; i < v.size() - 1; ++i) {
+  for (typename std::vector<V>::size_type i = 0; i < v.size() - 1; ++i) {
     std::cout << v[i] << " ";
   }
   if (v.size() > 0) {
@@ -378,17 +378,21 @@ bool avlvector<T>::invariant() const {
 
 template <class T>
 bool avlvector<T>::familially_consistent() const {
-  for (int i = 0; i < this->size(); ++i) {
-    const int p = parent[i];
-    if (p != -1 && left[p] != i && right[p] != i)
+  for (typename std::vector<T>::size_type i = 0; i < this->size(); ++i) {
+    const auto& p = parent[i];
+    if (p != -1 &&
+        static_cast<typename std::vector<T>::size_type>(left[p]) != i &&
+        static_cast<typename std::vector<T>::size_type>(right[p]) != i)
       return false;
 
-    const int l = left[i];
-    if (l != -1 && parent[l] != i)
+    const auto& l = left[i];
+    if (l != -1 &&
+        static_cast<typename std::vector<T>::size_type>(parent[l]) != i)
       return false;
 
-    const int r = right[i];
-    if (r != -1 && parent[r] != i)
+    const auto& r = right[i];
+    if (r != -1 &&
+        static_cast<typename std::vector<T>::size_type>(parent[r]) != i)
       return false;
   }
   return true;

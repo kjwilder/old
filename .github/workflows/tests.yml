@@ -8,4 +8,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: run tests
-        run: bazel test :list_test :vector_test :timer_test
+        run: bazel test :all
