@@ -92,24 +92,6 @@ vector<T>& vector<T>::operator<<(vector *v) {
 }
 
 // __________________________________________________________________________
-// Basic defines
-
-typedef vector<char> cvector;
-typedef vector<unsigned char> ucvector;
-typedef vector<int> ivector;
-typedef vector<unsigned int> uivector;
-typedef vector<uint64_t> lvector;
-typedef vector<float> fvector;
-typedef vector<double> dvector;
-typedef vector<cvector> cvectors;
-typedef vector<ucvector> ucvectors;
-typedef vector<ivector> ivectors;
-typedef vector<uivector> uivectors;
-typedef vector<lvector> lvectors;
-typedef vector<fvector> fvectors;
-typedef vector<dvector> dvectors;
-
-// __________________________________________________________________________
 // vector.h
 
 #endif  // VECTOR_H_

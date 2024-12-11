@@ -16,7 +16,6 @@ TEST(Initialization, StringConstructor) {
   simpstrg t = s;
   ASSERT_EQ(s, t);
   ASSERT_EQ(t, "abc");
-  ASSERT_TRUE(t == "abc");
 }
 
 TEST(Initialization, Concatenation) {
